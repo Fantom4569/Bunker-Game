@@ -3,141 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Гра БУНКЕР - Apocalypse Edition</title>
+    <title>BUNKER: Survival Game</title>
     <style>
-        /* --- ТВОЇ ОСНОВНІ СТИЛІ --- */
+        /* --- ОСНОВНИЙ СТИЛЬ --- */
         body {
             background-color: #2b2b2b;
-            /* Переконайся, що картинка badfon... лежить поруч з файлом */
-            background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('badfon-gorod-zdanie-apokalipsis.webp');
+            /* Переконайся, що файл картинки існує поруч! */
+            background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('badfon-gorod-zdanie-apokalipsis.webp');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
-            background-repeat: no-repeat;
-            
-            font-family: 'Impact', 'Arial Black', sans-serif;
+            color: #ecf0f1;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             text-align: center;
-            padding: 20px;
-            margin: 0;
+            margin: 0; padding: 20px;
             min-height: 100vh;
-            color: white;
         }
 
-        /* --- ЛОГІКА ЕКРАНІВ --- */
-        .screen { display: none; } /* Ховаємо всі екрани за замовчуванням */
-        .active { display: block; animation: fadeIn 0.5s; } /* Показуємо активний */
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        /* --- ЗАГОЛОВКИ --- */
+        h1 {
+            font-size: 3.5rem; color: #f4d03f; text-transform: uppercase;
+            text-shadow: 4px 4px 0 #000; letter-spacing: 3px; margin-bottom: 30px;
         }
-
-        h1, h2 {
-            color: #f4d03f;
-            text-transform: uppercase;
-            text-shadow: 4px 4px 0px #000;
-            letter-spacing: 3px;
-            background-color: rgba(0,0,0,0.5);
-            display: inline-block;
-            padding: 10px 20px;
-            border-radius: 10px;
-        }
-        h1 { font-size: 3.5rem; margin-bottom: 30px; }
-        h2 { font-size: 2.5rem; }
+        h2 { border-bottom: 2px solid #f4d03f; display: inline-block; padding-bottom: 10px; }
 
         /* --- КНОПКИ --- */
         button {
-            background-color: #c0392b;
-            color: #fff;
-            border: 4px solid #fff;
-            padding: 15px 40px;
-            font-size: 20px;
-            font-family: 'Impact', sans-serif;
-            text-transform: uppercase;
-            cursor: pointer;
-            margin: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            transition: 0.2s;
-            border-radius: 50px;
-            letter-spacing: 2px;
+            background: #c0392b; color: white; border: 2px solid white;
+            padding: 12px 25px; font-size: 1.1rem; font-weight: bold;
+            text-transform: uppercase; cursor: pointer; margin: 10px;
+            border-radius: 5px; transition: 0.2s; box-shadow: 0 4px 0 #8e1c10;
         }
-        button:hover {
-            background-color: #e74c3c;
-            transform: scale(1.05);
-            box-shadow: 0 0 20px #e74c3c;
-        }
-        button.secondary {
-            background-color: #555;
-            border-color: #999;
-            font-size: 16px;
-            padding: 10px 30px;
-        }
+        button:hover { transform: translateY(-2px); box-shadow: 0 6px 0 #8e1c10; }
+        button:active { transform: translateY(2px); box-shadow: 0 0 0; }
+        button:disabled { background: #555; border-color: #777; color: #999; cursor: not-allowed; box-shadow: none; }
+        
+        button.secondary { background: #555; box-shadow: 0 4px 0 #333; }
+        button.secondary:hover { background: #666; box-shadow: 0 6px 0 #333; }
+        
+        button.host-action { padding: 5px 10px; font-size: 0.9rem; margin: 2px; }
 
         /* --- ПОЛЯ ВВОДУ --- */
-        input[type="text"] {
-            padding: 15px;
-            font-size: 20px;
-            border-radius: 10px;
-            border: 3px solid #f4d03f;
-            background-color: #111;
-            color: #fff;
-            text-align: center;
-            font-family: 'Courier New', monospace;
+        input {
+            padding: 15px; font-size: 1.2rem; border-radius: 5px; border: 3px solid #f4d03f;
+            background: #222; color: white; text-align: center; width: 200px;
         }
 
-        /* --- КОНТЕЙНЕР КАРТОК --- */
+        /* --- ЕКРАНИ --- */
+        .screen { display: none; max-width: 1200px; margin: 0 auto; }
+        .active { display: block; animation: fadeEffect 0.5s; }
+        @keyframes fadeEffect { from {opacity: 0;} to {opacity: 1;} }
+
+        /* --- СІТКА КАРТОК --- */
         .container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 20px;
-            padding-bottom: 50px;
+            display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; padding-bottom: 50px;
         }
 
-        /* --- СТИЛЬ КАРТКИ --- */
+        /* --- ДИЗАЙН КАРТКИ (СТАРИЙ СТИЛЬ) --- */
         .card {
-            width: 240px;
-            height: 340px;
-            background-color: #f4d03f;
-            background-image: repeating-linear-gradient(45deg, rgba(0,0,0,0.05) 0px, rgba(0,0,0,0.05) 2px, transparent 2px, transparent 10px);
-            border-radius: 15px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            overflow: hidden;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.7);
-            transition: transform 0.2s;
-            border: 8px solid #fff;
-            position: relative;
-            color: #111;
+            width: 220px; min-height: 280px; background-color: #f4d03f;
+            background-image: repeating-linear-gradient(45deg, rgba(0,0,0,0.05) 0px, transparent 2px);
+            border-radius: 10px; display: flex; flex-direction: column;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5); border: 6px solid white;
+            color: #111; transition: 0.3s; position: relative;
         }
-        .card:hover { transform: scale(1.05) rotate(1deg); z-index: 10; }
+        .card:hover { transform: scale(1.03); z-index: 5; }
+        
         .card-header {
-            background-color: #111;
-            color: #f4d03f;
-            padding: 12px 5px;
-            text-transform: uppercase;
-            font-size: 20px;
-            border-bottom: 2px solid rgba(0,0,0,0.2);
+            background: #111; color: #f4d03f; padding: 10px; text-transform: uppercase; font-weight: bold;
         }
         .card-body {
-            flex-grow: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 15px;
-            font-size: 20px;
-            line-height: 1.2;
-            text-transform: uppercase;
-            word-wrap: break-word;
+            flex-grow: 1; display: flex; align-items: center; justify-content: center;
+            padding: 10px; font-size: 1.1rem; font-weight: bold; text-align: center;
         }
-        .card-footer {
-            background-color: #111;
-            color: #fff;
-            padding: 8px;
-            font-size: 12px;
-            font-family: 'Courier New', monospace;
-        }
+        .card-footer { background: #111; color: white; padding: 5px; font-size: 0.7rem; }
 
         /* КОЛЬОРИ РАМОК */
         .border-white { border-color: #ecf0f1; }
@@ -149,86 +88,153 @@
         .border-purple { border-color: #8e44ad; }
         .border-grey { border-color: #7f8c8d; }
 
-        /* --- КАТАСТРОФА --- */
-        #catastrophe-block {
-            background-color: rgba(17, 17, 17, 0.95);
-            color: #c0392b;
-            border: 4px solid #c0392b;
-            border-radius: 20px;
-            padding: 30px;
-            max-width: 700px;
-            margin: 40px auto;
-            display: none;
-            font-family: 'Courier New', monospace;
-            text-align: left;
-            box-shadow: 0 0 50px rgba(192, 57, 43, 0.3);
+        /* СТАТУС ВИГНАННОГО */
+        .kicked-player {
+            opacity: 0.5;
+            box-shadow: 0 0 20px 10px red;
+            border-color: red !important;
+            transform: scale(0.9);
+            pointer-events: none; /* Щоб не можна було клікати карти */
         }
-        #catastrophe-block strong { color: #f4d03f; }
+        .kicked-badge {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-15deg);
+            color: red; border: 5px solid red; font-size: 2rem; font-weight: bold;
+            padding: 10px; background: rgba(0,0,0,0.8); z-index: 10;
+        }
 
-        /* --- ПІДПИС --- */
-        .fantom-signature {
+        /* --- КАТАСТРОФА --- */
+        #catastrophe-block, #game-catastrophe {
+            background: rgba(17, 17, 17, 0.95); color: #ecf0f1;
+            border: 4px solid #c0392b; border-radius: 15px; padding: 20px;
+            max-width: 800px; margin: 20px auto; text-align: left;
             font-family: 'Courier New', monospace;
-            color: rgba(255, 255, 255, 0.4);
-            font-size: 16px;
-            margin-top: auto;
-            padding-top: 20px;
+            box-shadow: 0 0 30px rgba(192, 57, 43, 0.4);
         }
+        .cat-title { color: #c0392b; text-align: center; border-bottom: 2px dashed #c0392b; padding-bottom: 10px; margin-top: 0; }
+        .cat-label { color: #f4d03f; font-weight: bold; text-transform: uppercase; }
+
+        /* --- МОДАЛКА --- */
+        .modal {
+            display: none; position: fixed; z-index: 100; left: 0; top: 0;
+            width: 100%; height: 100%; background: rgba(0,0,0,0.85);
+        }
+        .modal-content {
+            background: #2b2b2b; margin: 15% auto; padding: 30px;
+            border: 4px solid #f4d03f; width: 300px; border-radius: 10px;
+        }
+        
+        /* Гравці в Лобі/Грі */
+        .player-row {
+            background: rgba(0,0,0,0.6); border: 2px solid #555; margin: 5px auto;
+            padding: 10px; max-width: 600px; display: flex; justify-content: space-between; align-items: center;
+        }
+        .host-controls { display: flex; gap: 5px; }
+
+        /* Елементи карток інших гравців */
+        .mini-card {
+            display: inline-block; padding: 3px 8px; margin: 2px; border-radius: 4px; font-size: 0.9rem;
+        }
+        .is-open { background: #222; border: 1px solid #f4d03f; color: #fff; }
+        .is-closed { background: #444; border: 1px solid #666; color: #aaa; font-style: italic; }
     </style>
 </head>
 <body>
 
     <div id="main-menu" class="screen active">
         <h1>☢️ БУНКЕР ☢️</h1>
-        <p style="font-size: 1.5em; margin-bottom: 40px;">Обери свій шлях виживання:</p>
-        
-        <button id="btn-mode-single">👤 Одиночна гра</button>
+        <p>АПОКАЛІПСИС БЛИЗЬКО...</p>
+        <button id="btn-mode-multi">👥 МУЛЬТИПЛЕЄР</button>
         <br>
-        <button id="btn-mode-multi">👥 Мультиплеєр</button>
+        <button id="btn-mode-single" class="secondary">👤 ОДИНОЧНА ГРА</button>
     </div>
 
     <div id="single-player-screen" class="screen">
-        <h2>Одиночний режим</h2>
-        
+        <h2>ОДИНОЧНИЙ РЕЖИМ</h2>
         <div class="controls">
-            <button id="btn-generate-single">Отримати досьє</button>
-            <button id="btn-show-catastrophe" style="background-color: #000; border-color: #c0392b; color: #c0392b;">⚠️ ВІДКРИТИ КАТАСТРОФУ</button>
+            <button id="btn-gen-single">📄 ОТРИМАТИ ДОСЬЄ</button>
+            <button id="btn-cat-single" style="background:#000; color:#c0392b; border-color:#c0392b;">⚠️ КАТАСТРОФА</button>
         </div>
 
-        <div class="container" id="cards-container">
-            </div>
+        <div id="single-cards-container" class="container"></div>
 
-        <div id="catastrophe-block">
-            <h2 id="cat-title" style="border:none; background:none; text-align: center;"></h2>
-            <p><strong>📜 Історія:</strong> <span id="cat-story"></span></p>
-            <p><strong>🏠 Бункер:</strong> <span id="cat-bunker"></span></p>
-            <p><strong>🌡️ Умови:</strong> <span id="cat-conditions"></span></p>
+        <div id="single-catastrophe-block" style="display:none;">
+            <h2 class="cat-title" id="single-cat-title"></h2>
+            <p><span class="cat-label">Історія:</span> <span id="single-cat-story"></span></p>
+            <p><span class="cat-label">Бункер:</span> <span id="single-cat-bunker"></span></p>
+            <p><span class="cat-label">Умови:</span> <span id="single-cat-cond"></span></p>
         </div>
 
-        <hr style="border-color: #444; margin: 40px 0;">
-        <button class="secondary" onclick="showScreen('main-menu')">⬅ Назад в меню</button>
+        <hr>
+        <button class="secondary back-btn">⬅ НАЗАД В МЕНЮ</button>
     </div>
 
     <div id="lobby-screen" class="screen">
-        <h2>Лобі гри</h2>
-        <h3>Кімната: <span id="lobby-room-code" style="color:#fff;">----</span></h3>
-        
-        <div class="lobby-controls" style="margin: 30px;">
-            <input type="text" id="input-room-code" placeholder="Код кімнати">
+        <h2>ЛОБІ БУНКЕРА</h2>
+        <h3 style="color:#f4d03f; font-size: 2rem;">КОД: <span id="lobby-code">----</span></h3>
+
+        <div id="lobby-entry">
+            <input type="text" id="inp-room-code" placeholder="КОД КІМНАТИ" maxlength="4">
             <br><br>
-            <button id="btn-join-room">Приєднатись</button>
-            <button id="btn-create-room">Створити кімнату</button>
+            <button id="btn-join-init">ПРИЄДНАТИСЬ</button>
+            <button id="btn-create-init">СТВОРИТИ КІМНАТУ</button>
         </div>
 
-        <h4>Гравці в кімнаті:</h4>
-        <div id="lobby-players-list">
-            <p style="color: gray;">Поки що порожньо...</p>
+        <div id="lobby-inside" style="display:none;">
+            <p>Очікування гравців...</p>
+            <div id="lobby-players"></div>
+            <br>
+            <button id="btn-start-game" style="display:none; background:#27ae60; font-size:1.5rem;">🚀 ПОЧАТИ ГРУ</button>
+            <br>
+            <button onclick="leaveGame()">🚪 ВИЙТИ</button>
         </div>
-
-        <hr style="border-color: #444; margin: 40px 0;">
-        <button class="secondary" onclick="showScreen('main-menu')">⬅ Назад в меню</button>
+        
+        <br>
+        <button class="secondary back-btn" id="lobby-back-btn">⬅ НАЗАД</button>
     </div>
 
-    <div class="fantom-signature">by Fantom/</div>
+    <div id="game-screen" class="screen">
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#111; padding:10px; border-bottom:2px solid #f4d03f;">
+            <div style="font-size:1.5rem; font-weight:bold;">РАУНД: <span id="game-round" style="color:#f4d03f">1</span></div>
+            <div id="kick-info" style="color:red;">КОГО ВИГНАТИ: -</div>
+            <div id="host-round-controls" style="display:none;">
+                <button class="host-action" id="btn-next-round">▶ НАСТУПНИЙ РАУНД</button>
+            </div>
+        </div>
+
+        <div id="game-catastrophe">
+            <h2 class="cat-title" id="multi-cat-title">КАТАСТРОФА</h2>
+            <p><span class="cat-label">Історія:</span> <span id="multi-cat-story">...</span></p>
+            <p><span class="cat-label">Бункер:</span> <span id="multi-cat-bunker">...</span></p>
+            <p><span class="cat-label">Умови:</span> <span id="multi-cat-cond">...</span></p>
+        </div>
+
+        <h2>МОЄ ДОСЬЄ</h2>
+        <p style="font-size:0.8rem; color:#aaa;">(Натисни на картку, щоб відкрити її для всіх)</p>
+        <div id="my-game-cards" class="container"></div>
+
+        <hr style="border-color:#444">
+
+        <h2>ГРАВЦІ</h2>
+        <div id="other-players-list"></div>
+
+        <div id="host-end-controls" style="display:none; margin-top:20px;">
+             <button id="btn-end-game" style="background:#f1c40f; color:black;">🏆 ЗАВЕРШИТИ ГРУ (ПІДРАХУНОК)</button>
+        </div>
+
+        <br><br>
+        <button class="secondary" onclick="leaveGame()">🚪 ПОКИНУТИ ГРУ</button>
+    </div>
+
+    <div id="name-modal" class="modal">
+        <div class="modal-content">
+            <h3>ВВЕДІТЬ ІМ'Я</h3>
+            <input type="text" id="inp-nickname" placeholder="Ваш Нікнейм">
+            <br><br>
+            <button id="btn-confirm-name">✅ ГОТОВО</button>
+            <br>
+            <button class="secondary" onclick="closeModal()">СКАСУВАТИ</button>
+        </div>
+    </div>
 
     <script type="module" src="app.js"></script>
 </body>

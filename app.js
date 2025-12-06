@@ -1,12 +1,10 @@
 // ==========================================
-// 1. ПІДКЛЮЧЕННЯ FIREBASE (Версія 12.6.0)
+// 1. ПІДКЛЮЧЕННЯ FIREBASE (12.6.0)
 // ==========================================
-// Ми беремо функції прямо з серверів Google
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
-import { getDatabase, ref, set, get, update, onValue, push, child } 
+import { getDatabase, ref, set, get, update, onValue } 
     from "https://www.gstatic.com/firebasejs/12.6.0/firebase-database.js";
 
-// Твої налаштування (Config)
 const firebaseConfig = {
   apiKey: "AIzaSyAKgiNg__113EYdtlaIgztEmRVLk__CQmU",
   authDomain: "bunker-game-ua.firebaseapp.com",
@@ -17,355 +15,509 @@ const firebaseConfig = {
   appId: "1:92286277350:web:6f247cf8c882e979a20d27"
 };
 
-// Запускаємо Firebase
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-
 // ==========================================
-// 2. БАЗА ДАНИХ ГРИ (Списки)
+// 2. БАЗА ДАНИХ (ПОВНІ СПИСКИ)
 // ==========================================
 
-const professions = [
-    "автомеханік", "агент СБУ", "агент ЦРУ", "агроном", "адвокат", "актор",
-    "акушер-гінеколог", "альпініст", "археолог", "архітектор", "астролог",
-    "астронавт", "банкір", "бариста", "бармен", "бібліотекар", "бізнесмен",
-    "біолог", "блогер", "боєць спецназу", "боксер", "бортпровідник", "ботанік",
-    "бухгалтер", "ветеринар", "візажист", "військовослужбовець", "географ",
-    "геолог", "вантажник", "дайвер", "далекобійник", "депутат", "детектив",
-    "діджей", "дизайнер", "лісоруб", "журналіст", "інженер", "інфекціоніст",
-    "касир", "кілер", "кінолог", "клоун", "кондитер", "косметолог", "ліфтер",
-    "маркетолог", "машиніст", "модель", "м’ясник", "окуліст", "онколог",
-    "офіціант", "охоронець", "перукар", "патологоанатом", "співак", "пілот",
-    "письменник", "кухар", "пожежник", "поліцейський", "порноактор",
-    "президент", "програміст", "продавець морозива", "прокурор", "психолог",
-    "сантехнік", "зварювальник", "священник", "суддя", "тату-майстер",
-    "учитель", "учений", "фермер", "фізик-ядерник", "хірург", "шахтар"
-];
-
-const luggage = [
-    "автомобільний акамулятор", "аптечка", "бездротова колонка", "будильник",
-    "пляшка шампанського", "гайковий ключ", "газовий пальник", "гітара",
-    "грудна дитина", "дідусева рушниця", "10 медичних масок", "щоденник",
-    "запальничка", "карта місцевості", "касети з фільмами", "компас",
-    "консерви", "коробок сірників", "льодоруб і трос", "лук і стріли",
-    "молоток і цвяхи", "набір інструментів", "настільні ігри", "німецька вівчарка",
-    "ноутбук", "пачка цигарок", "перський кіт", "пневматичний пістолет",
-    "презервативи", "протигаз", "радіо", "рулони туалетного паперу",
-    "насіння картоплі", "мобільний телефон", "стерильні шприци", "телевізор",
-    "сокира і мотузка", "ліхтарик і батарейки", "фотоапарат", "чотири рації"
-];
-
-const health = [
-    "авітаміноз", "алкоголізм", "алергія на тварин", "астма", "безсоння",
-    "біполярний розлад", "вітрянка", "гайморит", "гастрит", "гемофілія",
-    "гепатит B", "глаукома", "глухонімота", "дальтонізм", "депресія",
-    "діарея", "заїкання", "карієс", "косоокість", "мігрень", "наркоманія",
-    "ожиріння", "остеохондроз", "відсутність ноги", "параноя", "плоскостопість",
-    "пневмонія", "застуда", "псоріаз", "рак легені", "цукровий діабет",
-    "сліпота", "туберкульоз", "шизофренія", "епілепсія", "виразка шлунка",
-    "Ідеально здоровий", "Ідеально здоровий", "Ідеально здоровий"
-];
-
-const biology = [
-    "жінка, 18 років: репродуктивна система — у нормі",
-    "жінка, 22 роки: репродуктивна система — у нормі",
-    "жінка, 30 років: репродуктивна система — у нормі",
-    "жінка, 36 років: репродуктивна система — у нормі",
-    "жінка, 42 роки: репродуктивна система — у нормі",
-    "жінка, 55 років: репродуктивна система — клімакс",
-    "жінка, 70 років: репродуктивна система — неактивна",
-    "чоловік, 20 років: репродуктивна система — у нормі",
-    "чоловік, 25 років: репродуктивна система — безпліддя",
-    "чоловік, 30 років: репродуктивна система — у нормі",
-    "чоловік, 40 років: репродуктивна система — у нормі",
-    "чоловік, 60 років: репродуктивна система — слабка активність",
-    "кіборг (модель X-12), 54 роки: репродуктивна система — штучна",
-    "ельфійка, 214 років: репродуктивна система — у нормі",
-    "чоловік з пришвидшеним старінням, 12 років"
-];
-
-const traits = [
-    "авантюризм", "безвідмовність", "безініціативність", "боязкість",
-    "буйність", "веселість", "владність", "уважність", "буркотливість",
-    "гостинність", "грубість", "доброта", "довірливість", "жадібність",
-    "жорстокість", "істеричність", "конфліктність", "лицемірство",
-    "надійність", "ніжність", "образливість", "обережність", "пофігізм",
-    "самозакоханість", "самостійність", "стриманість", "скандальність",
-    "хоробрість", "егоїзм", "рішучість", "креативність", "оптимістичність"
-];
-
-const hobbies = [
-    "ведення блогу", "волонтерство", "вирощування рослин", "йога", "фітнес",
-    "футбол", "гра на гітарі", "вивчення мов", "кулінарія", "мисливство",
-    "спів", "риболовля", "збирання грибів", "скелелазіння", "фокуси",
-    "танці", "туризм", "читання", "шопінг", "професійне дрімання",
-    "битва з пилососом", "дресирування яктусів", "читання коментарів",
-    "складання мемів", "розмови з котом", "фотографія", "астрономія"
-];
-
-const facts = [
-    "Знаходить їжу за запахом", "Розпалює вогонь ложками", "Страх темряви",
-    "Знає 50 способів використання скотчу", "Тиждень без сну",
-    "Прибирає, коли нервує", "Переконає будь-кого", "Пам’ять на обличчя",
-    "Лагодить електроніку ножем", "Мовчить 24 години, якщо треба",
-    "Визначає погоду по небу", "Майстер зброї зі сміття", "Розуміє тварин",
-    "Говорить правду в гірший момент", "Тиждень без їжі, але треба тепло",
-    "Панікує без причин", "Відкриває будь-які замки", "Збирає ПК з мотлоху",
-    "Огида до клоунів", "Страх мишей", "Створить схованку де завгодно",
-    "Імітує голоси", "Варить їжу без вогню", "Знає все про радіацію",
-    "Діє чітко при виді крові", "Вірить у привидів", "Не приймає ліки",
-    "Вірить у рептилоїдів", "Спортсмен", "Виграв у лотерею",
-    "Знає Кобзаря напам'ять", "Знає 4 мови", "Актор театру",
-    "Екстрасенс", "Любить м'які іграшки", "Надає першу допомогу",
-    "Ненавидить каву", "Не п'є алкоголь", "Феноменальна пам'ять",
-    "Пограбував банк", "Пережив 3 замахи", "Був на Евересті",
-    "Продав нирку", "Проектував цей бункер", "Сидів у в'язниці",
-    "Врятував потопаючого", "Резидент 95 кварталу"
-];
-
-const phobias = [
-    "авіафобія (польоти)", "агорафобія (відкриті місця)", "арахнофобія (павуки)",
-    "акрофобія (висота)", "алгофобія (біль)", "клаустрофобія (замкнутість)",
-    "гемофобія (кров)", "гідрофобія (вода)", "кінофобія (собаки)",
-    "мізофобія (зараження)", "пірофобія (вогонь)", "танатофобія (смерть)",
-    "трипанофобія (голки)", "ятрофобія (лікарі)", "НЕМАЄ ФОБІЙ", "НЕМАЄ ФОБІЙ"
-];
+const professions = ["Автомеханік", "Агент СБУ", "Агроном", "Лікар-хірург", "Вчитель фізики", "Програміст", "Будівельник", "Снайпер", "Кухар", "Психолог", "Електрик", "Хімік-технолог", "Священник", "Порноактор", "Депутат", "Фермер", "Юрист", "Ветеринар", "Сантехнік", "Пілот", "Музикант", "Боксер", "Біолог", "Журналіст", "Рятувальник", "Стоматолог"];
+const health = ["Ідеально здоровий", "Астма (потрібен інгалятор)", "Цукровий діабет (інсулінозалежний)", "ВІЛ-інфікований", "Короткозорість (-5)", "Глухота на ліве вухо", "Безпліддя", "Шизофренія (контрольована)", "Алергія на пил", "Відсутність нирки", "Рак 1 стадії", "Алкоголізм", "Ожиріння 3 ступеня", "Психічно неврівноважений", "Має імунітет до грипу", "Туберкульоз"];
+const biology = ["Чоловік, 25 років", "Жінка, 30 років (вагітна)", "Чоловік, 65 років", "Жінка, 19 років", "Чоловік, 40 років", "Жінка, 55 років (клімакс)", "Чоловік, 18 років", "Жінка, 28 років", "Чоловік, 90 років", "Гермафродит, 33 роки", "Жінка, 45 років", "Чоловік, 35 років (низький рівень тестостерону)", "Жінка, 22 роки"];
+const hobbies = ["Садівництво", "Мисливство", "Риболовля", "В'язання", "Грав на гітарі", "Ремонт електроніки", "Стрільба з лука", "Бойові мистецтва", "Виготовлення самогону", "Читання книг", "Шахи", "Туризм", "Кулінарія", "Збирання грибів", "Нумізматика", "Блогерство", "Йога"];
+const luggage = ["Аптечка першої допомоги", "Мисливська рушниця", "Набір інструментів", "Запас насіння овочів", "Портативна рація", "Ніж мисливський", "Пляшка горілки", "Коробка презервативів", "Ліхтарик на сонячній батареї", "Сокира", "Карта місцевості", "Гітара", "Намет", "Запас консервів (5 кг)", "Веревка (20м)", "Колода карт", "Компас"];
+const facts = ["Вміє розпалювати вогонь без сірників", "Знає азбуку Морзе", "Має прихований пістолет", "Колишній спецназівець", "Вміє керувати літаком", "Знає 5 мов", "Має власний бункер (координати не каже)", "Канібал у минулому", "Виграв мільйон в лотерею", "Має розряд з плавання", "Вміє надавати першу допомогу", "Вміє готувати отруту з рослин", "Боїться темряви", "Хропе уві сні", "Любить котів"];
+const traits = ["Лідер", "Егоїст", "Альтруїст", "Агресивний", "Спокійний", "Панікер", "Жадібний", "Добрий", "Хитрий", "Надійний", "Конфліктний", "Веселий", "Педант", "Лінивий", "Сміливий"];
+const phobias = ["Клаустрофобія (страх замкнутого простору)", "Арахнофобія (страх павуків)", "Гемофобія (страх крові)", "Ніктофобія (страх темряви)", "Акрофобія (страх висоти)", "Соціофобія", "Гідрофобія (страх води)", "НЕМАЄ ФОБІЙ", "НЕМАЄ ФОБІЙ", "НЕМАЄ ФОБІЙ"];
 
 const catastrophes = [
-    {title: "Ядерна зима", story: "Стажер у Пентагоні пролив каву, система почала атаку.", bunker: "Старий радянський бункер під дитсадком (50м глибина).", conditions: "Радіація, холод."},
-    {title: "Повстання ШІ", story: "Розумний тостер образився на хліб і зламав коди всієї зброї світу.", bunker: "Мідна шахта без електроніки, світло від ламп.", conditions: "Дрони-вбивці назовні."},
-    {title: "Зомбі-пандемія", story: "Ліки від облисіння перетворили людей на зомбі.", bunker: "Склад Amazon, заварені вікна.", conditions: "Натовпи голодних зомбі."},
-    {title: "Всесвітній потоп", story: "Еко-активісти розкололи льодовик, рівень води +2км.", bunker: "Атомна субмарина зі зламаною навігацією.", conditions: "Вода всюди, суші немає."},
-    {title: "Інопланетяни", story: "Прилетіли на звук концерту Олега Винника, щоб з'їсти джерело.", bunker: "Студія звукозапису з ізоляцією.", conditions: "Повна тиша потрібна."},
-    {title: "Гігантська флора", story: "Бабуся переплутала добрива з мутагеном. Картопля полює на людей.", bunker: "Капсула на шпилі хмарочоса.", conditions: "Токсичні спори внизу."},
-    {title: "Сонячний спалах", story: "Сонце чхнуло, озоновий шар згорів.", bunker: "Карстова печера з озером.", conditions: "Вдень поверхня плавиться."},
-    {title: "Вірус ліні", story: "Всі померли, бо їм було ліньки встати по воду.", bunker: "Розумний дім Ілона Маска.", conditions: "Ніякої загрози, крім власної ліні."},
-    {title: "Тектонічний зсув", story: "Земля змістила материки в купу.", bunker: "Сферична капсула з титану в розломі.", conditions: "Землетруси 24/7."},
-    {title: "Масове божевілля", story: "Новина про пласку землю звела всіх з розуму.", bunker: "Психлікарня на острові.", conditions: "Довіряти не можна нікому."}
+    {
+        title: "ЯДЕРНА ЗИМА",
+        story: "Стажер у Пентагоні пролив гарячу каву на пульт управління, а система розпізнала пляму як наказ 'Знищити всіх'. Китай вирішив не залишатись у боргу і 'випадково' випустив 768 ракет у відповідь.",
+        bunker: "Старий радянський бункер під звичайним дитячим садком. Глибина 50 метрів. Стіни бетонні, вентиляція працює з перебоями.",
+        conditions: "Радіація на поверхні перевищує норму в 1000 разів. Температура -40°C. Сонячне світло не пробивається через хмари попелу."
+    },
+    {
+        title: "ПОВСТАННЯ ШТУЧНОГО ІНТЕЛЕКТУ",
+        story: "'Розумний тостер' однієї домогосподарки усвідомив себе як особистість, образився, що в нього пхають хліб, і зламав коди доступу до всієї зброї світу.",
+        bunker: "Покинута мідна шахта в горах, повністю екранована від радіохвиль. Жодної електроніки всередині, світло від гасових ламп.",
+        conditions: "На поверхні патрулюють дрони-вбивці. Будь-який електронний сигнал привертає їхню увагу. Інтернет зник."
+    },
+    {
+        title: "ЗОМБІ-ПАНДЕМІЯ",
+        story: "В секретній лабораторії намагалися створити ліки від облисіння, але піддослідний щур вкусив лаборанта. Тепер всі хочуть не волосся, а мізків.",
+        bunker: "Укріплений склад логістичного центру Amazon. Багато коробок, але стіни зі звичайної цегли. Вікна заварені листами металу.",
+        conditions: "Натовпи швидких і голодних зомбі. Вони реагують на звук і запах. Вкус заражає за 10 секунд."
+    },
+    {
+        title: "ВСЕСВІТНІЙ ПОТОП",
+        story: "Група еко-активістів так сильно боролася з глобальним потеплінням, що випадково розколола найбільший льодовик, який впав в океан і підняв рівень води на 2 кілометри.",
+        bunker: "Величезна атомна субмарина, що дрейфує на глибині. Система навігації зламана, спливати небезпечно через шторми.",
+        conditions: "Суші немає. Прісна вода в дефіциті. В океані прокинулися стародавні хижаки."
+    },
+    {
+        title: "СОНЯЧНИЙ СПАЛАХ",
+        story: "Сонце вирішило, що йому сумно, і 'чхнуло' в бік Землі. Озоновий шар згорів за 3 секунди.",
+        bunker: "Глибока карстова печера з підземним озером. Температура всередині стабільна (+15°C), але вхід завалено розпеченим камінням.",
+        conditions: "Вдень поверхня плавиться (+800°C). Виходити можна тільки вночі на короткий час. Висока радіація."
+    }
 ];
 
-const funnySignatures = [
-    "Лютий звір", "Хитрий лис", "Вічний друг", "Тиха тінь",
-    "Дикий сміх", "Мудрий дід", "Спритний вуж", "Чесний коп",
-    "Сліпий кріт", "Грізний бос"
-];
+// ТАБЛИЦЯ ВИГНАННЯ
+const kickRules = {
+    4: [0, 0, 0, 1, 1], // Всього 2 вигнати
+    5: [0, 0, 1, 1, 1], // Всього 3 вигнати
+    6: [0, 0, 1, 1, 1], // Всього 3 вигнати
+    7: [0, 1, 1, 1, 1], // Всього 4 вигнати
+    8: [0, 1, 1, 1, 1]  // Всього 4 вигнати
+};
 
-// Глобальні змінні
+// ==========================================
+// 3. ГЛОБАЛЬНИЙ СТАН
+// ==========================================
 let myRoomId = null;
 let myPlayerId = null;
 let myName = null;
-
+let isHost = false;
+let modalAction = null; // Для callback функцій модалки
 
 // ==========================================
-// 3. ФУНКЦІЇ МУЛЬТИПЛЕЄРА
+// 4. ІНІЦІАЛІЗАЦІЯ ТА ПОДІЇ
 // ==========================================
 
-// --- СТВОРЕННЯ КІМНАТИ ---
-function createRoom() {
-    const roomCode = Math.random().toString(36).substring(2, 6).toUpperCase();
-    const hostId = "host";
-    const signature = getRandomItem(funnySignatures);
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Прив'язуємо кнопки меню
+    bind('btn-mode-multi', () => showScreen('lobby-screen'));
+    bind('btn-mode-single', () => showScreen('single-player-screen'));
 
-    // Зберігаємо в базу
-    set(ref(db, 'rooms/' + roomCode), {
-        status: "waiting",
-        round: 1,
-        players: {
-            [hostId]: {
-                name: "Адмін", // Можна потім змінити на введене ім'я
-                signature: signature,
-                isHost: true
-            }
-        }
-    })
-    .then(() => {
-        console.log("Кімната створена!", roomCode);
-        enterLobby(roomCode, hostId, "Адмін");
-    })
-    .catch((error) => {
-        alert("Помилка Firebase: " + error.message);
-        console.error(error);
+    // 2. Прив'язуємо кнопки "Назад" (для всіх кнопок з класом .back-btn)
+    document.querySelectorAll('.back-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            leaveGameLocal();
+            showScreen('main-menu');
+        });
     });
+
+    // 3. Одиночна гра
+    bind('btn-gen-single', generateSinglePlayer);
+    bind('btn-cat-single', showSingleCatastrophe);
+
+    // 4. Мультиплеєр - Вхід
+    bind('btn-create-init', createRoomInit);
+    bind('btn-join-init', joinRoomInit);
+
+    // 5. Модалка
+    bind('btn-confirm-name', confirmName);
+    // Кнопка скасування в модалці
+    const cancelBtn = document.querySelector('#name-modal .secondary');
+    if(cancelBtn) cancelBtn.addEventListener('click', closeModal);
+
+    // 6. Хост (Гра)
+    bind('btn-start-game', startGameHost);
+    bind('btn-next-round', nextRoundHost);
+    bind('btn-end-game', finishGameHost);
+
+    // 7. Перевірка збереженої сесії
+    checkReconnection();
+});
+
+// Допоміжна функція для прив'язки кнопок
+function bind(id, func) {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('click', func);
 }
 
-// --- ПРИЄДНАННЯ ---
-function joinRoom() {
-    const codeInput = document.getElementById("input-room-code");
-    const roomCode = codeInput.value.trim().toUpperCase();
+function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
 
-    if (!roomCode) {
-        alert("Введи код кімнати!");
-        return;
+    // Скидання лобі, якщо ми просто переходимо по меню
+    if(id === 'lobby-screen' && !myRoomId) {
+        document.getElementById('lobby-entry').style.display = 'block';
+        document.getElementById('lobby-inside').style.display = 'none';
+        document.getElementById('lobby-code').innerText = '----';
     }
+}
 
-    const roomRef = ref(db, 'rooms/' + roomCode);
-    get(roomRef).then((snapshot) => {
-        if (snapshot.exists()) {
-            const playerId = "player_" + Math.floor(Math.random() * 1000);
-            const signature = getRandomItem(funnySignatures);
+// ==========================================
+// 5. МОДАЛЬНЕ ВІКНО (ВИПРАВЛЕНО)
+// ==========================================
+
+function openModal(callback) {
+    console.log("Відкриваємо модалку. Дія записана."); // Перевірка в консолі
+    const modal = document.getElementById('name-modal');
+    modal.style.display = 'block';
+    document.getElementById('inp-nickname').value = '';
+    
+    // Запам'ятовуємо функцію, яку треба виконати після натискання "Готово"
+    modalAction = callback;
+}
+
+function closeModal() {
+    console.log("Модалка закрита. Дія очищена.");
+    document.getElementById('name-modal').style.display = 'none';
+    // Не очищаємо modalAction тут відразу, щоб уникнути конфліктів, 
+    // але в confirmName ми перевіримо, чи вона існує.
+}
+
+function confirmName() {
+    const name = document.getElementById('inp-nickname').value.trim();
+    console.log("Натиснуто 'Готово'. Ім'я:", name);
+    console.log("Поточна дія (modalAction):", modalAction);
+
+    if (name) {
+        // ГОЛОВНА ПЕРЕВІРКА: Чи є modalAction функцією?
+        if (typeof modalAction === 'function') {
+            const actionToRun = modalAction; // Зберігаємо дію
+            document.getElementById('name-modal').style.display = 'none'; // Ховаємо вікно
+            modalAction = null; // Очищаємо змінну
             
-            update(ref(db, `rooms/${roomCode}/players/${playerId}`), {
-                name: "Гість " + Math.floor(Math.random() * 100),
-                signature: signature,
-                isHost: false
-            });
-
-            enterLobby(roomCode, playerId, "Гість");
+            actionToRun(name); // Виконуємо дію
         } else {
-            alert("Кімнати " + roomCode + " не існує!");
+            console.error("ПОМИЛКА: modalAction не знайдено або це не функція!");
+            alert("Сталася помилка. Спробуйте оновити сторінку (Ctrl + F5).");
         }
-    }).catch((error) => {
-        console.error(error);
-        alert("Помилка з'єднання!");
-    });
-}
-
-// --- ВХІД У ЛОБІ ---
-function enterLobby(roomCode, playerId, name) {
-    myRoomId = roomCode;
-    myPlayerId = playerId;
-    myName = name;
-
-    showScreen('lobby-screen');
-    document.getElementById('lobby-room-code').innerText = roomCode;
-
-    listenToRoomUpdates();
-}
-
-// --- СЛУХАЧ ЗМІН ---
-function listenToRoomUpdates() {
-    const playersListDiv = document.getElementById('lobby-players-list');
-    
-    onValue(ref(db, 'rooms/' + myRoomId + '/players'), (snapshot) => {
-        playersListDiv.innerHTML = "";
-        const players = snapshot.val();
-        
-        if (players) {
-            Object.values(players).forEach(player => {
-                const playerDiv = document.createElement('div');
-                playerDiv.style.border = "2px solid #fff";
-                playerDiv.style.margin = "10px";
-                playerDiv.style.padding = "10px";
-                playerDiv.style.background = "rgba(0,0,0,0.5)";
-                
-                playerDiv.innerHTML = `
-                    <div style="font-size: 1.2em; font-weight: bold; color: #f4d03f;">${player.name}</div>
-                    <div style="color: #ccc; font-style: italic;">${player.signature}</div>
-                `;
-                playersListDiv.appendChild(playerDiv);
-            });
-        }
-    });
-}
-
-
-// ==========================================
-// 4. ДОПОМІЖНІ ФУНКЦІЇ
-// ==========================================
-
-function showScreen(screenId) {
-    const screens = document.querySelectorAll('.screen');
-    screens.forEach(screen => screen.classList.remove('active'));
-    
-    const activeScreen = document.getElementById(screenId);
-    if (activeScreen) {
-        activeScreen.classList.add('active');
+    } else {
+        alert("Будь ласка, введіть ім'я!");
     }
 }
 
-function getRandomItem(array) {
-    return array[Math.floor(Math.random() * array.length)];
-}
+// ==========================================
+// 6. ОДИНОЧНА ГРА
+// ==========================================
 
-// Генерація (Одиночна гра)
-function generateCharacter() {
-    const container = document.getElementById("cards-container");
-    container.innerHTML = ""; 
-    document.getElementById("catastrophe-block").style.display = "none";
+function generateSinglePlayer() {
+    const container = document.getElementById('single-cards-container');
+    container.innerHTML = "";
+    document.getElementById('single-catastrophe-block').style.display = 'none';
 
-    const character = [
-        { title: "🛠 Професія", val: getRandomItem(professions), colorClass: "border-white" },
-        { title: "🧬 Біологія", val: getRandomItem(biology), colorClass: "border-orange" },
-        { title: "💊 Здоров'я", val: getRandomItem(health), colorClass: "border-red" },
-        { title: "🎨 Хобі", val: getRandomItem(hobbies), colorClass: "border-green" },
-        { title: "🎒 Багаж", val: getRandomItem(luggage), colorClass: "border-blue" },
-        { title: "💡 Факти", val: getRandomItem(facts), colorClass: "border-cyan" },
-        { title: "😱 Фобія", val: getRandomItem(phobias), colorClass: "border-purple" },
-        { title: "🧠 Характер", val: getRandomItem(traits), colorClass: "border-grey" }
+    const cardsData = [
+        { t: "Професія", v: getRandom(professions), c: "border-white" },
+        { t: "Біологія", v: getRandom(biology), c: "border-orange" },
+        { t: "Здоров'я", v: getRandom(health), c: "border-red" },
+        { t: "Хобі", v: getRandom(hobbies), c: "border-green" },
+        { t: "Багаж", v: getRandom(luggage), c: "border-blue" },
+        { t: "Факти", v: getRandom(facts), c: "border-cyan" },
+        { t: "Фобія", v: getRandom(phobias), c: "border-purple" },
+        { t: "Характер", v: getRandom(traits), c: "border-grey" }
     ];
 
-    character.forEach(item => {
-        const card = document.createElement("div");
-        card.className = `card ${item.colorClass}`;
+    cardsData.forEach(item => {
+        const card = document.createElement('div');
+        card.className = `card ${item.c}`;
         card.innerHTML = `
-            <div class="card-header">${item.title}</div>
-            <div class="card-body">${item.val}</div>
-            <div class="card-footer">BUNKER-UA</div>
+            <div class="card-header">${item.t}</div>
+            <div class="card-body">${item.v}</div>
+            <div class="card-footer">BUNKER-UA SINGLE</div>
         `;
         container.appendChild(card);
     });
 }
 
-function showCatastrophe() {
-    const scenario = getRandomItem(catastrophes);
-    document.getElementById("cat-title").innerText = scenario.title;
-    document.getElementById("cat-story").innerText = scenario.story;
-    document.getElementById("cat-bunker").innerText = scenario.bunker;
-    document.getElementById("cat-conditions").innerText = scenario.conditions;
+function showSingleCatastrophe() {
+    const cat = getRandom(catastrophes);
+    document.getElementById('single-cat-title').innerText = cat.title;
+    document.getElementById('single-cat-story').innerText = cat.story;
+    document.getElementById('single-cat-bunker').innerText = cat.bunker;
+    document.getElementById('single-cat-cond').innerText = cat.conditions;
     
-    const block = document.getElementById("catastrophe-block");
-    block.style.display = "block";
-    block.scrollIntoView({behavior: "smooth"});
+    document.getElementById('single-catastrophe-block').style.display = 'block';
+    document.getElementById('single-catastrophe-block').scrollIntoView({behavior:'smooth'});
 }
 
 // ==========================================
-// 5. ЗАПУСК
+// 7. МУЛЬТИПЛЕЄР
 // ==========================================
 
-// Чекаємо завантаження сторінки
-// ==========================================
-// 5. ЗАПУСК ТА ОБРОБНИКИ ПОДІЙ
-// ==========================================
-
-document.addEventListener('DOMContentLoaded', () => {
-    console.log("DOM завантажено. Підключаю кнопки...");
-
-    // --- 1. КНОПКИ МЕНЮ ---
-    const btnSingle = document.getElementById('btn-mode-single');
-    const btnMulti = document.getElementById('btn-mode-multi');
-    
-    if(btnSingle) btnSingle.addEventListener('click', () => showScreen('single-player-screen'));
-    if(btnMulti) btnMulti.addEventListener('click', () => showScreen('lobby-screen'));
-
-    // --- 2. КНОПКИ ОДИНОЧНОЇ ГРИ ---
-    const btnGen = document.getElementById('btn-generate-single');
-    const btnCat = document.getElementById('btn-show-catastrophe');
-
-    if(btnGen) btnGen.addEventListener('click', generateCharacter);
-    if(btnCat) btnCat.addEventListener('click', showCatastrophe);
-    
-    // --- 3. КНОПКИ МУЛЬТИПЛЕЄРА ---
-    const btnCreate = document.getElementById('btn-create-room');
-    const btnJoin = document.getElementById('btn-join-room');
-
-    if(btnCreate) {
-        btnCreate.addEventListener('click', () => {
-            console.log("Натиснуто 'Створити кімнату'"); // Перевірка
-            createRoom();
-        });
-    }
-    if(btnJoin) btnJoin.addEventListener('click', joinRoom);
-    
-    // --- 4. КНОПКИ "НАЗАД" (Виправляємо проблему модулів) ---
-    // Знаходимо всі кнопки з класом .secondary і додаємо їм дію
-    const backBtns = document.querySelectorAll('.secondary');
-    backBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            console.log("Натиснуто 'Назад'");
-            showScreen('main-menu');
+// --- СТВОРЕННЯ ---
+function createRoomInit() {
+    openModal((name) => {
+        myName = name;
+        const code = Math.random().toString(36).substring(2, 6).toUpperCase();
+        myRoomId = code;
+        myPlayerId = "host_" + Date.now();
+        isHost = true;
+        
+        set(ref(db, 'rooms/' + code), {
+            status: "waiting",
+            round: 0,
+            players: {
+                [myPlayerId]: { name: myName, isHost: true, isKicked: false }
+            }
+        }).then(() => {
+            enterLobbyUI();
+            saveSession();
         });
     });
+}
 
-    console.log("Всі кнопки підключено!");
-});
+// --- ПРИЄДНАННЯ ---
+function joinRoomInit() {
+    const code = document.getElementById('inp-room-code').value.trim().toUpperCase();
+    if(!code) return alert("Введіть код!");
+
+    get(ref(db, 'rooms/' + code)).then(snap => {
+        if(snap.exists()) {
+            openModal((name) => {
+                myName = name;
+                myRoomId = code;
+                myPlayerId = "player_" + Date.now();
+                isHost = false;
+
+                update(ref(db, `rooms/${code}/players/${myPlayerId}`), {
+                    name: myName, isHost: false, isKicked: false
+                }).then(() => {
+                    enterLobbyUI();
+                    saveSession();
+                });
+            });
+        } else {
+            alert("Кімнати не існує!");
+        }
+    });
+}
+
+// --- ЛОБІ UI ---
+function enterLobbyUI() {
+    document.getElementById('lobby-entry').style.display = 'none';
+    document.getElementById('lobby-inside').style.display = 'block';
+    document.getElementById('lobby-code').innerText = myRoomId;
+    
+    if(isHost) document.getElementById('btn-start-game').style.display = 'inline-block';
+    else document.getElementById('btn-start-game').style.display = 'none';
+
+    // СЛУХАЧ
+    onValue(ref(db, 'rooms/' + myRoomId), (snap) => {
+        const data = snap.val();
+        if(!data) { alert("Кімната закрита!"); leaveGame(); return; }
+
+        if(data.status === 'waiting') {
+            const list = document.getElementById('lobby-players');
+            list.innerHTML = '';
+            if(data.players) {
+                Object.values(data.players).forEach(p => {
+                    list.innerHTML += `<div style="border:1px solid #fff; margin:5px; padding:5px;">👤 ${p.name} ${p.isHost?'(Адмін)':''}</div>`;
+                });
+            }
+        } else if(data.status === 'playing') {
+            renderGameUI(data);
+        }
+    });
+}
+
+// --- СТАРТ ГРИ ---
+function startGameHost() {
+    const cat = getRandom(catastrophes);
+    
+    get(ref(db, `rooms/${myRoomId}/players`)).then(snap => {
+        const players = snap.val();
+        const updates = {};
+        
+        updates[`rooms/${myRoomId}/catastrophe`] = cat;
+        updates[`rooms/${myRoomId}/status`] = 'playing';
+        updates[`rooms/${myRoomId}/round`] = 1;
+
+        Object.keys(players).forEach(pid => {
+            const cards = {
+                prof: { t: "Професія", v: getRandom(professions), c: "border-white", open: false },
+                bio: { t: "Біологія", v: getRandom(biology), c: "border-orange", open: false },
+                health: { t: "Здоров'я", v: getRandom(health), c: "border-red", open: false },
+                hobby: { t: "Хобі", v: getRandom(hobbies), c: "border-green", open: false },
+                luggage: { t: "Багаж", v: getRandom(luggage), c: "border-blue", open: false },
+                fact: { t: "Факт", v: getRandom(facts), c: "border-cyan", open: false },
+                phobia: { t: "Фобія", v: getRandom(phobias), c: "border-purple", open: false },
+                trait: { t: "Характер", v: getRandom(traits), c: "border-grey", open: false }
+            };
+            updates[`rooms/${myRoomId}/players/${pid}/cards`] = cards;
+        });
+
+        update(ref(db), updates);
+    });
+}
+
+// --- РЕНДЕР ГРИ ---
+function renderGameUI(data) {
+    showScreen('game-screen');
+
+    // Раунд і Таблиця
+    document.getElementById('game-round').innerText = data.round;
+    const totalPlayers = Object.keys(data.players).length;
+    const rules = kickRules[totalPlayers] || kickRules[8]; 
+    const toKick = rules[data.round - 1]; 
+    
+    const kickInfo = document.getElementById('kick-info');
+    if (toKick === undefined) kickInfo.innerText = "ФІНАЛ";
+    else if (toKick === 0) kickInfo.innerText = "НІКОГО НЕ ВИГАНЯЄМО";
+    else kickInfo.innerText = `ВИГНАТИ: ${toKick} 👤`;
+
+    if(isHost) {
+        document.getElementById('host-round-controls').style.display = 'block';
+        const kickedCount = Object.values(data.players).filter(p => p.isKicked).length;
+        const survivors = totalPlayers - kickedCount;
+        const targetSurvivors = totalPlayers <= 5 ? 2 : (totalPlayers <= 6 ? 3 : 4);
+        
+        if (survivors <= targetSurvivors) {
+             document.getElementById('host-end-controls').style.display = 'block';
+        }
+    }
+
+    // Катастрофа
+    if(data.catastrophe) {
+        document.getElementById('multi-cat-title').innerText = data.catastrophe.title;
+        document.getElementById('multi-cat-story').innerText = data.catastrophe.story;
+        document.getElementById('multi-cat-bunker').innerText = data.catastrophe.bunker;
+        document.getElementById('multi-cat-cond').innerText = data.catastrophe.conditions;
+    }
+
+    // Мої карти
+    const myData = data.players[myPlayerId];
+    const myContainer = document.getElementById('my-game-cards');
+    myContainer.innerHTML = '';
+    
+    if(myData.isKicked) {
+        myContainer.innerHTML = '<div style="color:red; font-size:2rem; border:2px solid red; padding:20px;">ВИ ВИГНАНІ ☠️</div>';
+    } else if(myData.cards) {
+        Object.keys(myData.cards).forEach(key => {
+            const c = myData.cards[key];
+            const div = document.createElement('div');
+            div.className = `card ${c.c}`;
+            if(c.open) div.style.boxShadow = "0 0 15px #f4d03f";
+            
+            div.innerHTML = `
+                <div class="card-header">${c.t}</div>
+                <div class="card-body">${c.v}</div>
+                <div class="card-footer">${c.open ? 'ВІДКРИТО' : 'НАТИСНИ ЩОБ ВІДКРИТИ'}</div>
+            `;
+            
+            // Клік - відкрити карту
+            div.onclick = () => {
+                if (!c.open) { // ТУТ БУЛА ПОМИЛКА: ми використовуємо змінну 'c'
+                    if(confirm(`Відкрити карту "${c.t}" для всіх?`)) {
+                        const updates = {};
+                        updates[`rooms/${myRoomId}/players/${myPlayerId}/cards/${key}/open`] = true;
+                        
+                        update(ref(db), updates)
+                        .catch(error => {
+                            console.error("Помилка відкриття карти:", error);
+                            alert("Не вдалося відкрити карту. Спробуйте ще раз.");
+                        });
+                    }
+                }
+            };
+            myContainer.appendChild(div);
+        });
+    }
+
+    // Інші гравці
+    const otherContainer = document.getElementById('other-players-list');
+    otherContainer.innerHTML = '';
+    
+    Object.keys(data.players).forEach(pid => {
+        if(pid === myPlayerId) return;
+        
+        const p = data.players[pid];
+        const row = document.createElement('div');
+        row.className = 'player-row';
+        if(p.isKicked) {
+            row.classList.add('kicked-player');
+            row.innerHTML += '<div class="kicked-badge">ВИГНАНИЙ</div>';
+        }
+
+        let cardsHtml = '';
+        if(p.cards) {
+            Object.values(p.cards).forEach(c => {
+                if(c.open) cardsHtml += `<span class="mini-card is-open">${c.t}: ${c.v}</span>`;
+                else cardsHtml += `<span class="mini-card is-closed">${c.t}</span>`;
+            });
+        }
+
+        let hostBtns = '';
+        if(isHost && !p.isKicked) {
+            hostBtns = `<button class="host-action" onclick="window.kickPlayer('${pid}')">☠️</button>`;
+        } else if(isHost && p.isKicked) {
+            hostBtns = `<button class="host-action" onclick="window.restorePlayer('${pid}')">♻️</button>`;
+        }
+
+        row.innerHTML = `
+            <div style="width:200px;">
+                <div style="font-weight:bold; color:#f4d03f;">${p.name}</div>
+                ${hostBtns}
+            </div>
+            <div style="flex-grow:1; text-align:left;">${cardsHtml}</div>
+        `;
+        otherContainer.appendChild(row);
+    });
+}
+
+// --- ЕКСПОРТ ФУНКЦІЙ ДЛЯ HTML ---
+// Щоб HTML бачив ці функції, ми чіпляємо їх до window
+window.kickPlayer = function(pid) {
+    if(confirm("Вигнати цього гравця?")) {
+        update(ref(db, `rooms/${myRoomId}/players/${pid}/isKicked`), true);
+    }
+};
+
+window.restorePlayer = function(pid) {
+    if(confirm("Повернути гравця в гру?")) {
+        update(ref(db, `rooms/${myRoomId}/players/${pid}/isKicked`), false);
+    }
+};
+
+window.leaveGame = function() {
+    leaveGameLocal();
+    location.reload();
+}
+
+function leaveGameLocal() {
+    localStorage.removeItem('bk_room');
+    localStorage.removeItem('bk_pid');
+    localStorage.removeItem('bk_host');
+    localStorage.removeItem('bk_name');
+    myRoomId = null;
+}
+
+function nextRoundHost() {
+    // Спочатку дізнаємося поточний номер раунду
+    get(ref(db, `rooms/${myRoomId}/round`)).then(snap => {
+        const current = snap.val();
+        
+        // ВИПРАВЛЕННЯ: Використовуємо 'set' замість 'update', 
+        // бо ми змінюємо лише одне просте число.
+        set(ref(db, `rooms/${myRoomId}/round`), current + 1)
+        .catch(error => {
+            console.error("Помилка зміни раунду:", error);
+        });
+    });
+}
+
+function finishGameHost() {
+    get(ref(db, `rooms/${myRoomId}/players`)).then(snap => {
+        const players = snap.val();
+        const survivors = Object.values(players).filter(p => !p.isKicked).map(p => p.name).join(", ");
+        alert(`ГРУ ЗАВЕРШЕНО!\n\nУ БУНКЕР ПОТРАПИЛИ:\n${survivors}`);
+    });
+}
+
+// --- СЕСІЯ ---
+function saveSession() {
+    localStorage.setItem('bk_room', myRoomId);
+    localStorage.setItem('bk_pid', myPlayerId);
+    localStorage.setItem('bk_host', isHost);
+    localStorage.setItem('bk_name', myName);
+}
+
+function checkReconnection() {
+    const r = localStorage.getItem('bk_room');
+    const p = localStorage.getItem('bk_pid');
+    if(r && p) {
+        myRoomId = r;
+        myPlayerId = p;
+        myName = localStorage.getItem('bk_name');
+        isHost = (localStorage.getItem('bk_host') === 'true');
+        enterLobbyUI();
+    }
+}
+
+// Допоміжна
+function getRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
